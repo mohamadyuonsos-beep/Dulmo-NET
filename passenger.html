@@ -391,8 +391,14 @@ async function loadBuses(){
       dbg(`🚌 إضافة marker: ${b.driver_name} @ [${lat}, ${lng}]`);
       const bIcon=L.divIcon({
         className:'',
-        html:`<div style="background:${selectedColor};color:#fff;font-size:15px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);border:2px solid #fff">🚌</div>`,
-        iconSize:[34,34], iconAnchor:[17,17]
+        html:`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))">🚌</div>
+          <div style="background:rgba(21,101,192,.92);color:#fff;font-family:Cairo,sans-serif;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.3);max-width:100px;text-align:center;line-height:1.4">
+            ${escH(b.driver_name)}<br>
+            <span style="font-weight:400;opacity:.85">${escH(b.route_name)}</span>
+          </div>
+        </div>`,
+        iconSize:[100,60], iconAnchor:[50,28]
       });
       const m=L.marker([lat,lng],{icon:bIcon,zIndexOffset:500})
         .addTo(map)
