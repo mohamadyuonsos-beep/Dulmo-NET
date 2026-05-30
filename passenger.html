@@ -6,45 +6,117 @@
 <title>Dolmuş NET — الراكب</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
-  h1 { color: #1E88E5; font-size: 28px; margin-bottom: 8px; }
-  p { color: #666; font-size: 14px; margin-bottom: 24px; }
-  .card { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
+  body { font-family: Arial, sans-serif; background: #f5f7fa; min-height: 100vh; padding: 24px; }
+  h1 { color: #1E88E5; font-size: 24px; text-align: center; margin-bottom: 4px; }
+  .subtitle { color: #666; font-size: 13px; text-align: center; margin-bottom: 20px; }
+  .card { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; margin: 0 auto 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
   .btn { display: block; width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 12px; }
   .btn-primary { background: #1E88E5; color: white; }
-  .status { margin-top: 16px; font-size: 13px; color: #888; }
-  .bus-icon { font-size: 48px; margin-bottom: 16px; }
+  .btn-outline { background: white; color: #1E88E5; border: 2px solid #1E88E5; }
+  .status { margin-top: 12px; font-size: 13px; color: #888; text-align: center; }
+  .bus-card { background: #E3F2FD; border-radius: 12px; padding: 14px; margin-top: 10px; display: flex; align-items: center; gap: 12px; }
+  .bus-icon { font-size: 32px; }
+  .bus-info { flex: 1; }
+  .bus-name { font-weight: bold; color: #1E88E5; font-size: 15px; }
+  .bus-route { color: #666; font-size: 13px; }
+  .bus-dist { color: #43A047; font-size: 13px; font-weight: bold; }
+  .header-icon { font-size: 40px; text-align: center; display: block; margin-bottom: 8px; }
+  .loading { text-align: center; color: #888; padding: 20px; }
+  .no-buses { text-align: center; color: #888; padding: 20px; font-size: 14px; }
 </style>
 </head>
 <body>
+
 <div class="card">
-  <div class="bus-icon">🚌</div>
+  <span class="header-icon">🚌</span>
   <h1>Dolmuş NET</h1>
-  <p>تتبع الحافلات في الوقت الفعلي</p>
-  <button class="btn btn-primary" onclick="getLocation()">📍 تحديد موقعي</button>
+  <p class="subtitle">تتبع الحافلات في الوقت الفعلي</p>
+  <button class="btn btn-primary" onclick="start()">📍 تحديد موقعي وعرض الحافلات</button>
   <div class="status" id="status">اضغط لتحديد موقعك</div>
 </div>
+
+<div class="card" id="buses-card" style="display:none">
+  <strong>🚌 الحافلات القريبة منك</strong>
+  <div id="buses-list"><div class="loading">⏳ جاري التحميل...</div></div>
+  <button class="btn btn-outline" onclick="fetchBuses()" style="margin-top:12px">🔄 تحديث</button>
+</div>
+
 <script>
+  const SUPABASE_URL = 'https://ezmvwhpmvuokrrvsohuv.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_tfN63FododffKy9jdqa8Tw_zD5GTnzY';
+
   let userLat = null;
   let userLng = null;
-  function getLocation() {
+
+  function start() {
     const status = document.getElementById('status');
-    status.textContent = 'جاري تحديد موقعك...';
+    status.textContent = '⏳ جاري تحديد موقعك...';
     if (!navigator.geolocation) {
-      status.textContent = 'المتصفح لا يدعم GPS';
+      status.textContent = '❌ المتصفح لا يدعم GPS';
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         userLat = pos.coords.latitude;
         userLng = pos.coords.longitude;
-        status.textContent = 'تم تحديد موقعك: ' + userLat.toFixed(4) + ', ' + userLng.toFixed(4);
+        status.textContent = '✅ تم تحديد موقعك';
+        document.getElementById('buses-card').style.display = 'block';
+        fetchBuses();
+        setInterval(fetchBuses, 10000);
       },
-      (err) => {
-        status.textContent = 'تعذر تحديد الموقع - تأكد من تفعيل GPS';
-      },
+      () => { status.textContent = '❌ تعذّر تحديد الموقع'; },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  }
+
+  function calcDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function formatDist(m) {
+    return m < 1000 ? Math.round(m) + ' م' : (m/1000).toFixed(1) + ' كم';
+  }
+
+  async function fetchBuses() {
+    const list = document.getElementById('buses-list');
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/live_locations?select=driver_name,route_name,lat,lng`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+      );
+      const buses = await res.json();
+
+      if (!buses || buses.length === 0) {
+        list.innerHTML = '<div class="no-buses">لا توجد حافلات نشطة الآن</div>';
+        return;
+      }
+
+      // رتّب حسب المسافة
+      const sorted = buses
+        .map(b => ({ ...b, dist: calcDistance(userLat, userLng, b.lat, b.lng) }))
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, 5); // أقرب 5 حافلات
+
+      list.innerHTML = sorted.map(b => `
+        <div class="bus-card">
+          <div class="bus-icon">🚌</div>
+          <div class="bus-info">
+            <div class="bus-name">${b.driver_name}</div>
+            <div class="bus-route">خط: ${b.route_name}</div>
+            <div class="bus-dist">📍 ${formatDist(b.dist)}</div>
+          </div>
+        </div>
+      `).join('');
+
+    } catch(e) {
+      list.innerHTML = '<div class="no-buses">❌ خطأ في الاتصال</div>';
+    }
   }
 </script>
 </body>
