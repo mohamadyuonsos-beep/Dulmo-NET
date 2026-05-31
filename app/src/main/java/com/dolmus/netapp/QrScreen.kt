@@ -33,7 +33,7 @@ fun generateQrBitmap(content: String, size: Int = 512): Bitmap {
 @Composable
 fun QrScreen(lang: String, onBack: () -> Unit) {
 
-    val landingUrl = "https://mohamadyuonsos-beep.github.io/Dulmo-NET/landing.html"
+    val landingUrl = "https://nexoradevss.github.io/Dulmo-NET/"
     val qrBitmap = remember { generateQrBitmap(landingUrl) }
 
     val title = when(lang) { "tr" -> "QR Kodu"; "en" -> "QR Code"; else -> "رمز QR" }
