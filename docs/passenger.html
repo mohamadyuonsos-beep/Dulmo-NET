@@ -28,6 +28,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 .hdr-title h1{font-size:16px;font-weight:700}
 .hdr-title p{display:none}
 .hdr-user{display:none}
+.hdr-loc-btn{background:#FFA000;color:#fff;border:none;border-radius:10px;padding:6px 14px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0}
+.hdr-loc-btn.ok{background:#2E7D32}
+.hdr-loc-btn.loading{background:#E65100}
+.hdr-loc-btn.err{background:#C62828}
 .wrap{max-width:520px;margin:-6px auto 0;padding:0 10px 30px}
 .card{background:var(--card);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);border:1px solid var(--border)}
 .card-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
@@ -87,24 +91,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
     <h1>Dolmuş NET</h1>
     <p>تتبع الحافلات في الوقت الفعلي</p>
   </div>
-  <div class="hdr-user" id="hdrUser">🧑‍💼 الراكب</div>
+  <button class="hdr-loc-btn" id="hdrLocBtn" onclick="getLocation()">📍 تحديد موقعي</button>
 </div>
 
 <div class="wrap">
 
-  <div class="card">
-    <div class="card-title">📍 موقعك الحالي</div>
-    <div class="loc-row idle" id="locRow" onclick="getLocation()">
-      <div style="font-size:20px;flex-shrink:0">📍</div>
-      <div class="loc-body">
-        <div id="locText">اضغط لتحديد موقعك</div>
-        <div class="loc-sub" id="locSub"></div>
-      </div>
-      <div id="locAction">اضغط</div>
-    </div>
-  </div>
-
-  <div class="card hidden" id="mapCard">
+  <div class="card" id="mapCard">
     <div class="card-title">🗺️ خريطة المسارات</div>
     <div id="map"></div>
     <div class="map-hint">اضغط على مسار أو اختره من القائمة أدناه</div>
@@ -123,8 +115,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
       <button class="refresh-btn" onclick="loadBuses()">🔄 تحديث</button>
     </div>
     <div class="update-time" id="updateTime"></div>
-    <button class="debug-toggle" onclick="toggleDebug()">🛠 عرض بيانات التشخيص</button>
-    <div class="debug-panel" id="debugPanel"></div>
     <div id="busesList"></div>
   </div>
 
@@ -167,31 +157,25 @@ function toggleDebug(){
 }
 
 function getLocation(){
-  const row=document.getElementById('locRow');
-  const lt=document.getElementById('locText');
-  const la=document.getElementById('locAction');
-  row.className='loc-row loading';
-  lt.textContent='جاري تحديد موقعك...';
-  la.innerHTML='<span class="spinner"></span>';
+  const btn=document.getElementById('hdrLocBtn');
+  btn.className='hdr-loc-btn loading';
+  btn.textContent='⏳ جاري التحديد...';
   if(!navigator.geolocation){
-    row.className='loc-row err';lt.textContent='المتصفح لا يدعم GPS';la.textContent='❌';return;
+    btn.className='hdr-loc-btn err';btn.textContent='❌ GPS غير مدعوم';return;
   }
   navigator.geolocation.getCurrentPosition(
     pos=>{
       userLat=pos.coords.latitude;userLng=pos.coords.longitude;
-      row.className='loc-row ok';
-      lt.textContent='تم تحديد موقعك ✅';
-      document.getElementById('locSub').textContent=userLat.toFixed(5)+' , '+userLng.toFixed(5);
-      la.textContent='✅';
+      btn.className='hdr-loc-btn ok';
+      btn.textContent='✅ تم تحديد موقعك';
       initMap();
     },
-    ()=>{row.className='loc-row err';lt.textContent='تعذّر تحديد الموقع — تأكد من GPS';la.textContent='↩';},
+    ()=>{btn.className='hdr-loc-btn err';btn.textContent='↩ تعذّر التحديد';},
     {enableHighAccuracy:true,timeout:12000}
   );
 }
 
 function initMap(){
-  document.getElementById('mapCard').classList.remove('hidden');
   document.getElementById('routesCard').classList.remove('hidden');
   if(!map){
     map=L.map('map',{zoomControl:true,attributionControl:false}).setView([userLat,userLng],14);
