@@ -21,7 +21,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
-/* إزالة الخلفية الافتراضية لـ Leaflet divIcon */
 .bus-marker-icon{background:transparent!important;border:none!important;}
 .hdr{background:var(--blue);padding:8px 14px 14px;color:#fff;display:flex;align-items:center;gap:10px}
 .hdr-logo{font-size:20px}
@@ -81,7 +80,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 </style>
 </head>
 <body>
- 
+
 <div class="hdr">
   <div class="hdr-logo">🚌</div>
   <div class="hdr-title">
@@ -90,9 +89,9 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
   </div>
   <div class="hdr-user" id="hdrUser">🧑‍💼 الراكب</div>
 </div>
- 
+
 <div class="wrap">
- 
+
   <div class="card">
     <div class="card-title">📍 موقعك الحالي</div>
     <div class="loc-row idle" id="locRow" onclick="getLocation()">
@@ -104,20 +103,20 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
       <div id="locAction">اضغط</div>
     </div>
   </div>
- 
+
   <div class="card hidden" id="mapCard">
     <div class="card-title">🗺️ خريطة المسارات</div>
     <div id="map"></div>
     <div class="map-hint">اضغط على مسار أو اختره من القائمة أدناه</div>
   </div>
- 
+
   <div class="card hidden" id="routesCard">
     <div class="card-title">🚌 اختر الخط</div>
     <div class="routes-grid" id="routesGrid">
       <div class="empty"><div class="empty-e">⏳</div>جاري تحميل الخطوط...</div>
     </div>
   </div>
- 
+
   <div class="card hidden" id="busesCard">
     <div class="refresh-row">
       <div class="card-title" style="margin-bottom:0" id="busesTitle">🚌 الحافلات الفعالة</div>
@@ -128,15 +127,15 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
     <div class="debug-panel" id="debugPanel"></div>
     <div id="busesList"></div>
   </div>
- 
+
 </div>
- 
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const SB_URL = 'https://ezmvwhpmvuokrrvsohuv.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6bXZ3aHBtdnVva3JydnNvaHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTcxNDQsImV4cCI6MjA5NDI3MzE0NH0.je77PXmfbjR9H7TWzVhpQ4Kt6mTRiI0UfS9pHQzpHhU
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6bXZ3aHBtdnVva3JydnNvaHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2OTcxNDQsImV4cCI6MjA5NDI3MzE0NH0.je77PXmfbjR9H7TWzVhpQ4Kt6mTRiI0UfS9pHQzpHhU';
 const COLORS = ['#1E88E5','#E53935','#43A047','#FB8C00','#8E24AA','#00ACC1','#F4511E','#3949AB','#00897B','#D81B60'];
- 
+
 let userLat=null, userLng=null;
 let map=null, userMarker=null;
 let busMarkers=[];
@@ -145,7 +144,7 @@ let selectedRouteName=null;
 let selectedColor='#1E88E5';
 let busInterval=null;
 let routeColorMap={};
- 
+
 function sbGet(table,params=''){
   return fetch(`${SB_URL}/rest/v1/${table}${params}`,
     {headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}}).then(r=>r.json());
@@ -166,7 +165,7 @@ function dbg(msg){
 function toggleDebug(){
   document.getElementById('debugPanel').classList.toggle('show');
 }
- 
+
 function getLocation(){
   const row=document.getElementById('locRow');
   const lt=document.getElementById('locText');
@@ -190,7 +189,7 @@ function getLocation(){
     {enableHighAccuracy:true,timeout:12000}
   );
 }
- 
+
 function initMap(){
   document.getElementById('mapCard').classList.remove('hidden');
   document.getElementById('routesCard').classList.remove('hidden');
@@ -208,7 +207,7 @@ function initMap(){
     .addTo(map).bindPopup('📍 موقعك الحالي');
   loadRoutes();
 }
- 
+
 async function loadRoutes(){
   document.getElementById('routesGrid').innerHTML=
     '<div class="empty"><div class="empty-e">⏳</div>جاري تحميل الخطوط...</div>';
@@ -271,7 +270,7 @@ async function loadRoutes(){
       '<div class="empty"><div class="empty-e">❌</div>خطأ في تحميل الخطوط: '+escH(e.message)+'</div>';
   }
 }
- 
+
 function renderRouteList(grouped){
   const grid=document.getElementById('routesGrid');
   const names=Object.keys(grouped);
@@ -298,7 +297,7 @@ function renderRouteList(grouped){
     </button>`;
   }).join('');
 }
- 
+
 function selectRoute(rName,color){
   selectedRouteName=rName;
   selectedColor=color||routeColorMap[rName]||'#1E88E5';
@@ -326,7 +325,7 @@ function selectRoute(rName,color){
   busInterval=setInterval(loadBuses,10000);
   setTimeout(()=>document.getElementById('busesCard').scrollIntoView({behavior:'smooth'}),300);
 }
- 
+
 async function loadBuses(){
   if(!selectedRouteName) return;
   const list=document.getElementById('busesList');
@@ -357,13 +356,12 @@ async function loadBuses(){
       list.innerHTML='<div class="empty"><div class="empty-e">⚠️</div>البيانات موجودة لكن الإحداثيات غير صالحة<br><small>اضغط "عرض بيانات التشخيص" للتفاصيل</small></div>';
       return;
     }
- 
+
     validBuses.forEach(b=>{
       const lat=parseFloat(b.lat);
       const lng=parseFloat(b.lng);
       dbg(`🚌 إضافة marker: ${b.driver_name} @ [${lat}, ${lng}]`);
- 
-      /* ✅ الإيقونة بدون دائرة — إيموجي + بطاقة اسم واضحة */
+
       const bIcon=L.divIcon({
         className:'bus-marker-icon',
         html:`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
@@ -375,19 +373,19 @@ async function loadBuses(){
         </div>`,
         iconSize:[130,72],iconAnchor:[65,34]
       });
- 
+
       const m=L.marker([lat,lng],{icon:bIcon,zIndexOffset:500})
         .addTo(map)
         .bindPopup(`<div style="font-family:Cairo;min-width:140px"><b>${escH(b.driver_name)}</b><br><span style="color:#607D8B;font-size:12px">الخط: ${escH(b.route_name)}</span></div>`);
       busMarkers.push(m);
     });
- 
+
     if(busMarkers.length===1){
       map.setView([parseFloat(validBuses[0].lat),parseFloat(validBuses[0].lng)],15);
     } else if(busMarkers.length>1){
       map.fitBounds(L.featureGroup(busMarkers).getBounds().pad(0.3));
     }
- 
+
     list.innerHTML=validBuses.map(b=>{
       const lat=parseFloat(b.lat);
       const lng=parseFloat(b.lng);
