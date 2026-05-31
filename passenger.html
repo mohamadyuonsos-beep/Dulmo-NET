@@ -1,9 +1,9 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DolmuÅŸ NET â€” Ø§Ù„Ø±Ø§ÙƒØ¨</title>
+<title>Dolmu? NET — ÇáÑÇßÈ</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -31,34 +31,34 @@ body{font-family:Arial,sans-serif;background:#F5F7FA;min-height:100vh}
 </head>
 <body>
 
-<div class="top-bar"><h1>ğŸšŒ DolmuÅŸ NET</h1></div>
+<div class="top-bar"><h1>?? Dolmu? NET</h1></div>
 
 <div class="section">
-  <div class="section-title">ğŸ“ Ù…ÙˆÙ‚Ø¹Ùƒ Ø§Ù„Ø­Ø§Ù„ÙŠ</div>
+  <div class="section-title">?? ãæŞÚß ÇáÍÇáí</div>
   <div class="loc-row">
-    <span class="loc-status" id="loc-status">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ø¯ÙŠØ¯...</span>
-    <button class="btn btn-primary btn-sm" onclick="getLocation()">ØªØ­Ø¯ÙŠØ«</button>
+    <span class="loc-status" id="loc-status">ÌÇÑí ÇáÊÍÏíÏ...</span>
+    <button class="btn btn-primary btn-sm" onclick="getLocation()">ÊÍÏíË</button>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">ğŸ—ºï¸ Ø§Ù„Ø®Ø±ÙŠØ·Ø©</div>
+  <div class="section-title">??? ÇáÎÑíØÉ</div>
   <div id="map"></div>
-  <p style="font-size:11px;color:#999;margin-top:4px;text-align:center">Ø§Ø¶ØºØ· Ø¹Ù„Ù‰ Ù…Ø³Ø§Ø± Ø£Ùˆ Ø§Ø®ØªØ±Ù‡ Ù…Ù† Ø§Ù„Ù‚Ø§Ø¦Ù…Ø©</p>
+  <p style="font-size:11px;color:#999;margin-top:4px;text-align:center">ÇÖÛØ Úáì ãÓÇÑ Ãæ ÇÎÊÑå ãä ÇáŞÇÆãÉ</p>
 </div>
 
 <div class="section">
-  <div class="section-title">ğŸšŒ Ø§Ø®ØªØ± Ø§Ù„Ø®Ø·</div>
-  <div class="route-list" id="route-list"><span style="color:#aaa;font-size:12px">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...</span></div>
+  <div class="section-title">?? ÇÎÊÑ ÇáÎØ</div>
+  <div class="route-list" id="route-list"><span style="color:#aaa;font-size:12px">ÌÇÑí ÇáÊÍãíá...</span></div>
   <div class="passenger-badge" id="passenger-badge" style="display:none">
-    ğŸ§ Ù…ÙˆÙ‚Ø¹Ùƒ Ù…Ø±Ø³Ù„ Ù„Ù„Ø³Ø§Ø¦Ù‚ Ø¹Ù„Ù‰ Ù‡Ø°Ø§ Ø§Ù„Ø®Ø·
+    ?? ãæŞÚß ãÑÓá ááÓÇÆŞ Úáì åĞÇ ÇáÎØ
   </div>
 </div>
 
 <div class="section" id="buses-section" style="display:none">
   <div style="display:flex;align-items:center;justify-content:space-between">
-    <div class="section-title" style="margin:0">ğŸšŒ Ø§Ù„Ø­Ø§ÙÙ„Ø§Øª Ø§Ù„Ù‚Ø±ÙŠØ¨Ø©</div>
-    <button class="btn btn-primary btn-sm" onclick="fetchBuses()">ğŸ”„</button>
+    <div class="section-title" style="margin:0">?? ÇáÍÇİáÇÊ ÇáŞÑíÈÉ</div>
+    <button class="btn btn-primary btn-sm" onclick="fetchBuses()">??</button>
   </div>
   <div class="buses-list" id="buses-list"></div>
 </div>
@@ -76,7 +76,7 @@ let routeLines = [];
 let passengerId = null;
 let sendInterval = null;
 
-// ØªÙˆÙ„ÙŠØ¯ ID ÙØ±ÙŠØ¯ Ù„Ù„Ø±Ø§ÙƒØ¨ ÙÙŠ Ù‡Ø°Ù‡ Ø§Ù„Ø¬Ù„Ø³Ø©
+// ÊæáíÏ ID İÑíÏ ááÑÇßÈ İí åĞå ÇáÌáÓÉ
 passengerId = 'p_' + Math.random().toString(36).substr(2, 9);
 
 map = L.map('map').setView([36.99, 35.33], 13);
@@ -87,24 +87,24 @@ loadRoutes();
 setInterval(fetchBuses, 10000);
 
 function getLocation() {
-  document.getElementById('loc-status').textContent = 'â³ Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ø¯ÙŠØ¯...';
+  document.getElementById('loc-status').textContent = '? ÌÇÑí ÇáÊÍÏíÏ...';
   navigator.geolocation.watchPosition(pos => {
     userLat = pos.coords.latitude;
     userLng = pos.coords.longitude;
-    document.getElementById('loc-status').textContent = 'âœ… ' + userLat.toFixed(4) + ' , ' + userLng.toFixed(4);
+    document.getElementById('loc-status').textContent = '? ' + userLat.toFixed(4) + ' , ' + userLng.toFixed(4);
     if (!userMarker) {
       userMarker = L.circleMarker([userLat, userLng], {
         radius:10, color:'#E65100', fillColor:'#FF9800', fillOpacity:1, weight:2
-      }).addTo(map).bindPopup('ğŸ§ Ù…ÙˆÙ‚Ø¹Ùƒ');
+      }).addTo(map).bindPopup('?? ãæŞÚß');
       map.setView([userLat, userLng], 15);
     } else {
       userMarker.setLatLng([userLat, userLng]);
     }
-    // Ø£Ø±Ø³Ù„ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø±Ø§ÙƒØ¨ Ø¥Ø°Ø§ Ø§Ø®ØªØ§Ø± Ø®Ø·Ø§Ù‹
+    // ÃÑÓá ãæŞÚ ÇáÑÇßÈ ÅĞÇ ÇÎÊÇÑ ÎØÇğ
     if (selectedRoute) sendPassengerLocation();
     fetchBuses();
   }, () => {
-    document.getElementById('loc-status').textContent = 'âŒ ØªØ¹Ø°Ù‘Ø± Ø§Ù„ØªØ­Ø¯ÙŠØ¯';
+    document.getElementById('loc-status').textContent = '? ÊÚĞøÑ ÇáÊÍÏíÏ';
   }, {enableHighAccuracy:true, timeout:10000, maximumAge:5000});
 }
 
@@ -143,10 +143,10 @@ function selectRoute(name, el) {
   document.getElementById('buses-section').style.display = 'block';
   document.getElementById('passenger-badge').style.display = 'block';
 
-  // Ø£Ø±Ø³Ù„ Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø±Ø§ÙƒØ¨ ÙÙˆØ±Ø§Ù‹
+  // ÃÑÓá ãæŞÚ ÇáÑÇßÈ İæÑÇğ
   if (userLat) sendPassengerLocation();
 
-  // Ø£Ø±Ø³Ù„ ÙƒÙ„ 15 Ø«Ø§Ù†ÙŠØ©
+  // ÃÑÓá ßá 15 ËÇäíÉ
   if (sendInterval) clearInterval(sendInterval);
   sendInterval = setInterval(() => {
     if (userLat) sendPassengerLocation();
@@ -158,7 +158,7 @@ function selectRoute(name, el) {
 async function sendPassengerLocation() {
   if (!userLat || !selectedRoute) return;
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/passengers', {
+    await fetch(SUPABASE_URL + '/rest/v1/passenger_locations', {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_KEY,
@@ -176,11 +176,11 @@ async function sendPassengerLocation() {
   } catch(e) { console.error('passenger send error:', e); }
 }
 
-// Ø§Ø­Ø°Ù Ø§Ù„Ø±Ø§ÙƒØ¨ Ø¹Ù†Ø¯ Ø¥ØºÙ„Ø§Ù‚ Ø§Ù„ØµÙØ­Ø©
+// ÇÍĞİ ÇáÑÇßÈ ÚäÏ ÅÛáÇŞ ÇáÕİÍÉ
 window.addEventListener('beforeunload', () => {
   if (passengerId) {
     navigator.sendBeacon(
-      SUPABASE_URL + '/rest/v1/passengers?id=eq.' + passengerId,
+      SUPABASE_URL + '/rest/v1/passenger_locations?id=eq.' + passengerId,
       null
     );
   }
@@ -194,7 +194,7 @@ function calcDist(lat1, lng1, lat2, lng2) {
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-function fmtDist(m) { return m < 1000 ? Math.round(m)+'Ù…' : (m/1000).toFixed(1)+'ÙƒÙ…'; }
+function fmtDist(m) { return m < 1000 ? Math.round(m)+'ã' : (m/1000).toFixed(1)+'ßã'; }
 
 async function fetchBuses() {
   if (!userLat) return;
@@ -209,19 +209,19 @@ async function fetchBuses() {
     busMarkers = [];
     const list = document.getElementById('buses-list');
     if (!buses || buses.length === 0) {
-      list.innerHTML = '<div style="color:#aaa;font-size:13px;padding:8px 0">Ù„Ø§ ØªÙˆØ¬Ø¯ Ø­Ø§ÙÙ„Ø§Øª Ù†Ø´Ø·Ø©</div>';
+      list.innerHTML = '<div style="color:#aaa;font-size:13px;padding:8px 0">áÇ ÊæÌÏ ÍÇİáÇÊ äÔØÉ</div>';
       return;
     }
     const sorted = buses.map(b => ({...b, dist: calcDist(userLat,userLng,b.lat,b.lng)})).sort((a,b)=>a.dist-b.dist);
     list.innerHTML = sorted.map(b => `
       <div class="bus-item">
-        <span>ğŸšŒ</span>
+        <span>??</span>
         <span><b>${b.driver_name}</b><br><small>${b.route_name}</small></span>
         <span class="bus-dist">${fmtDist(b.dist)}</span>
       </div>`).join('');
     sorted.forEach(b => {
       const m = L.marker([b.lat, b.lng], {
-        icon: L.divIcon({className:'', html:'<div style="font-size:24px">ğŸšŒ</div>', iconSize:[30,30], iconAnchor:[15,15]})
+        icon: L.divIcon({className:'', html:'<div style="font-size:24px">??</div>', iconSize:[30,30], iconAnchor:[15,15]})
       }).addTo(map).bindPopup(b.driver_name + '<br>' + b.route_name);
       busMarkers.push(m);
     });

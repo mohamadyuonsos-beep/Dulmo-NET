@@ -60,24 +60,28 @@ data class LiveLocation(
     @SerialName("updated_at")  val updatedAt: String = ""
 )
 
+@Serializable
+data class PassengerLocation(
+    val id: String = "",
+    @SerialName("route_name") val routeName: String = "",
+    val lat: Double = 0.0,
+    val lng: Double = 0.0
+)
+
 fun loadRouteLocally(context: Context, routeName: String, direction: String): List<PointData> {
     return try {
         val prefs = context.getSharedPreferences("dolmus_routes", Context.MODE_PRIVATE)
-        val key = "route_${routeName}_${direction}"
-        val json = prefs.getString(key, "") ?: ""
-        if (json.isBlank()) {
-            prefs.all.keys.forEach { Log.d("DOLMUS", "Available key: $it") }
-            emptyList()
-        } else {
-            Json.decodeFromString(ListSerializer(PointData.serializer()), json)
-        }
+        val key   = "route_${routeName}_${direction}"
+        val json  = prefs.getString(key, "") ?: ""
+        if (json.isBlank()) emptyList()
+        else Json.decodeFromString(ListSerializer(PointData.serializer()), json)
     } catch (e: Exception) {
         Log.e("DOLMUS", "Error loading route: ${e.message}")
         emptyList()
     }
 }
 
-// ─── أيقونة حافلتك أنت مع اسمك واسم الخط فوقها ─────────────────
+// ─── أيقونة حافلتك ───────────────────────────────────────────────
 fun createBusIcon(
     context: Context,
     driverName: String = "",
@@ -87,46 +91,41 @@ fun createBusIcon(
     val height = 160
     val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
     val canvas = android.graphics.Canvas(bitmap)
-    val cx = width / 2f
+    val cx     = width / 2f
 
     if (driverName.isNotBlank() || routeName.isNotBlank()) {
         val bgPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             color = android.graphics.Color.parseColor("#CC1565C0")
         }
-        val rect = android.graphics.RectF(cx - 100f, 0f, cx + 100f, 62f)
-        canvas.drawRoundRect(rect, 10f, 10f, bgPaint)
+        canvas.drawRoundRect(android.graphics.RectF(cx - 100f, 0f, cx + 100f, 62f), 10f, 10f, bgPaint)
 
         val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-            color = android.graphics.Color.WHITE
+            color     = android.graphics.Color.WHITE
             textAlign = android.graphics.Paint.Align.CENTER
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            typeface  = android.graphics.Typeface.DEFAULT_BOLD
         }
 
         if (driverName.isNotBlank() && routeName.isNotBlank()) {
             textPaint.textSize = 22f
-            val displayName = if (driverName.length > 13) driverName.take(13) + "…" else driverName
-            canvas.drawText(displayName, cx, 24f, textPaint)
+            canvas.drawText(if (driverName.length > 13) driverName.take(13) + "…" else driverName, cx, 24f, textPaint)
             textPaint.textSize = 19f
-            textPaint.color = android.graphics.Color.parseColor("#90CAF9")
-            val displayRoute = if (routeName.length > 13) routeName.take(13) + "…" else routeName
-            canvas.drawText(displayRoute, cx, 52f, textPaint)
+            textPaint.color    = android.graphics.Color.parseColor("#90CAF9")
+            canvas.drawText(if (routeName.length > 13) routeName.take(13) + "…" else routeName, cx, 52f, textPaint)
         } else {
             textPaint.textSize = 22f
-            val display = if (driverName.isNotBlank()) driverName else routeName
-            canvas.drawText(display, cx, 38f, textPaint)
+            canvas.drawText(if (driverName.isNotBlank()) driverName else routeName, cx, 38f, textPaint)
         }
     }
 
     val busPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 80f
+        textSize  = 80f
         textAlign = android.graphics.Paint.Align.CENTER
     }
     canvas.drawText("🚌", cx, 148f, busPaint)
-
     return android.graphics.drawable.BitmapDrawable(context.resources, bitmap)
 }
 
-// ─── أيقونة حافلة سائق آخر مع اسمه واسم الخط ───────────────────
+// ─── أيقونة حافلة سائق آخر ───────────────────────────────────────
 fun createOtherBusIcon(
     context: Context,
     driverName: String,
@@ -136,41 +135,49 @@ fun createOtherBusIcon(
     val height = 160
     val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
     val canvas = android.graphics.Canvas(bitmap)
-    val cx = width / 2f
+    val cx     = width / 2f
 
     val bgPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
         color = android.graphics.Color.parseColor("#CCB71C1C")
     }
-    val rect = android.graphics.RectF(cx - 100f, 0f, cx + 100f, 62f)
-    canvas.drawRoundRect(rect, 10f, 10f, bgPaint)
+    canvas.drawRoundRect(android.graphics.RectF(cx - 100f, 0f, cx + 100f, 62f), 10f, 10f, bgPaint)
 
     val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-        color = android.graphics.Color.WHITE
+        color     = android.graphics.Color.WHITE
         textAlign = android.graphics.Paint.Align.CENTER
-        typeface = android.graphics.Typeface.DEFAULT_BOLD
+        typeface  = android.graphics.Typeface.DEFAULT_BOLD
+        textSize  = 22f
     }
-
-    textPaint.textSize = 22f
-    val displayName = if (driverName.length > 13) driverName.take(13) + "…" else driverName
-    canvas.drawText(displayName, cx, 24f, textPaint)
+    canvas.drawText(if (driverName.length > 13) driverName.take(13) + "…" else driverName, cx, 24f, textPaint)
 
     if (routeName.isNotBlank()) {
         textPaint.textSize = 19f
-        textPaint.color = android.graphics.Color.parseColor("#FFCDD2")
-        val displayRoute = if (routeName.length > 13) routeName.take(13) + "…" else routeName
-        canvas.drawText(displayRoute, cx, 52f, textPaint)
+        textPaint.color    = android.graphics.Color.parseColor("#FFCDD2")
+        canvas.drawText(if (routeName.length > 13) routeName.take(13) + "…" else routeName, cx, 52f, textPaint)
     }
 
     val busPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 80f
+        textSize  = 80f
         textAlign = android.graphics.Paint.Align.CENTER
     }
     canvas.drawText("🚌", cx, 148f, busPaint)
-
     return android.graphics.drawable.BitmapDrawable(context.resources, bitmap)
 }
 
-// ─── دالة مساعدة لرسم المسار على الخريطة ────────────────────────
+// ─── أيقونة الراكب ───────────────────────────────────────────────
+fun createPassengerIcon(context: Context): android.graphics.drawable.BitmapDrawable {
+    val size   = 80
+    val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    val paint  = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        textSize  = 60f
+        textAlign = android.graphics.Paint.Align.CENTER
+    }
+    val y = size / 2f - (paint.descent() + paint.ascent()) / 2f
+    canvas.drawText("🧍", size / 2f, y, paint)
+    return android.graphics.drawable.BitmapDrawable(context.resources, bitmap)
+}
+
 fun drawRouteOnMap(
     mapView: MapView,
     points: List<PointData>,
@@ -207,9 +214,11 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
     var showConfirmDialog by remember { mutableStateOf(false) }
     var routeLoadStatus   by remember { mutableStateOf("") }
     var otherBusCount     by remember { mutableStateOf(0) }
+    var passengerCount    by remember { mutableStateOf(0) }
 
-    val otherBusMarkers = remember { mutableMapOf<String, Marker>() }
-    val myDriverName    = remember { LocationForegroundService.currentDriverName }
+    val otherBusMarkers  = remember { mutableMapOf<String, Marker>() }
+    val passengerMarkers = remember { mutableMapOf<String, Marker>() }
+    val myDriverName     = remember { LocationForegroundService.currentDriverName }
 
     val workStartTime    = remember { System.currentTimeMillis() }
     val workStartTimeStr = remember { SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()) }
@@ -252,7 +261,6 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
         val localReturning = loadRouteLocally(context, routeName, "returning")
 
         if (localGoing.isEmpty() || localReturning.isEmpty()) {
-            Log.d("DOLMUS", "Local route not found, fetching from Supabase...")
             try {
                 val results = supabase.postgrest["routes"]
                     .select { filter { eq("route_name", routeName) } }
@@ -261,30 +269,25 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
                 val going     = results.firstOrNull { it.direction == "going" }
                 val returning = results.firstOrNull { it.direction == "returning" }
 
-                if (going != null && going.points.isNotEmpty()) {
-                    drawRouteOnMap(
-                        mapView, going.points, goingPolyline,
-                        startTitle = when(lang) { "tr" -> "Gidiş Başlangıç"; "en" -> "Going Start"; else -> "بداية الذهاب" },
-                        endTitle   = when(lang) { "tr" -> "Gidiş Sonu"; "en" -> "Going End"; else -> "نهاية الذهاب" }
-                    )
-                    // حفظ محلياً للمرة القادمة
-                    saveRouteLocally(context, routeName, "going", going.points)
+                going?.let {
+                    if (it.points.isNotEmpty()) {
+                        drawRouteOnMap(mapView, it.points, goingPolyline,
+                            when(lang) { "tr" -> "Gidiş Başlangıç"; "en" -> "Going Start"; else -> "بداية الذهاب" },
+                            when(lang) { "tr" -> "Gidiş Sonu"; "en" -> "Going End"; else -> "نهاية الذهاب" }
+                        )
+                        saveRouteLocally(context, routeName, "going", it.points)
+                    }
                 }
-
-                if (returning != null && returning.points.isNotEmpty()) {
-                    drawRouteOnMap(
-                        mapView, returning.points, returningPolyline,
-                        startTitle = when(lang) { "tr" -> "Dönüş Başlangıç"; "en" -> "Return Start"; else -> "بداية العودة" },
-                        endTitle   = when(lang) { "tr" -> "Dönüş Sonu"; "en" -> "Return End"; else -> "نهاية العودة" }
-                    )
-                    saveRouteLocally(context, routeName, "returning", returning.points)
+                returning?.let {
+                    if (it.points.isNotEmpty()) {
+                        drawRouteOnMap(mapView, it.points, returningPolyline,
+                            when(lang) { "tr" -> "Dönüş Başlangıç"; "en" -> "Return Start"; else -> "بداية العودة" },
+                            when(lang) { "tr" -> "Dönüş Sonu"; "en" -> "Return End"; else -> "نهاية العودة" }
+                        )
+                        saveRouteLocally(context, routeName, "returning", it.points)
+                    }
                 }
-
-                val g = going?.points?.size ?: 0
-                val r = returning?.points?.size ?: 0
-                routeLoadStatus = "G:$g R:$r ☁️"
-                Log.d("DOLMUS", "Route fetched from Supabase: G=$g R=$r")
-
+                routeLoadStatus = "G:${going?.points?.size ?: 0} R:${returning?.points?.size ?: 0} ☁️"
             } catch (e: Exception) {
                 Log.e("DOLMUS", "Supabase route fetch error: ${e.message}")
                 routeLoadStatus = "❌"
@@ -296,24 +299,24 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
     LaunchedEffect(routeName) {
         while (true) {
             try {
+                val currentMyName = LocationForegroundService.currentDriverName
                 val result = supabase.postgrest["live_locations"]
                     .select { filter { eq("route_name", routeName) } }
                     .decodeList<LiveLocation>()
 
                 val currentNames = result.map { it.driverName }.toSet()
-                val toRemove     = otherBusMarkers.keys.filter { it !in currentNames }
-                toRemove.forEach { name ->
+                otherBusMarkers.keys.filter { it !in currentNames }.forEach { name ->
                     mapView.overlays.remove(otherBusMarkers[name])
                     otherBusMarkers.remove(name)
                 }
 
                 result.forEach { loc ->
-                    if (loc.driverName == myDriverName) return@forEach
+                    if (currentMyName.isBlank() || loc.driverName == currentMyName) return@forEach
                     val point    = GeoPoint(loc.lat, loc.lng)
                     val existing = otherBusMarkers[loc.driverName]
                     if (existing != null) {
                         existing.position = point
-                        existing.icon = createOtherBusIcon(context, loc.driverName, loc.routeName)
+                        existing.icon     = createOtherBusIcon(context, loc.driverName, loc.routeName)
                     } else {
                         val m = Marker(mapView).apply {
                             position = point
@@ -326,7 +329,7 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
                     }
                 }
 
-                otherBusCount = result.count { it.driverName != myDriverName }
+                otherBusCount = result.count { it.driverName != currentMyName && currentMyName.isNotBlank() }
                 mapView.invalidate()
 
             } catch (e: Exception) {
@@ -336,29 +339,68 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
         }
     }
 
+    // ─── جلب الركاب كل 10 ثوانٍ ─────────────────────────────────
+    LaunchedEffect(routeName) {
+        while (true) {
+            try {
+                val result = supabase.postgrest["passenger_locations"]
+                    .select { filter { eq("route_name", routeName) } }
+                    .decodeList<PassengerLocation>()
+
+                val currentIds = result.map { it.id }.toSet()
+                passengerMarkers.keys.filter { it !in currentIds }.forEach { id ->
+                    mapView.overlays.remove(passengerMarkers[id])
+                    passengerMarkers.remove(id)
+                }
+
+                result.forEach { p ->
+                    val point    = GeoPoint(p.lat, p.lng)
+                    val existing = passengerMarkers[p.id]
+                    if (existing != null) {
+                        existing.position = point
+                    } else {
+                        val m = Marker(mapView).apply {
+                            position = point
+                            icon     = createPassengerIcon(context)
+                            title    = when(lang) { "tr" -> "Yolcu"; "en" -> "Passenger"; else -> "راكب" }
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        }
+                        mapView.overlays.add(m)
+                        passengerMarkers[p.id] = m
+                    }
+                }
+
+                passengerCount = result.size
+                mapView.invalidate()
+
+            } catch (e: Exception) {
+                Log.e("DOLMUS", "Passengers fetch error: ${e.message}")
+            }
+            delay(10000L)
+        }
+    }
+
     DisposableEffect(Unit) {
         Configuration.getInstance().userAgentValue = context.packageName
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
         mapView.controller.setZoom(17.0)
+        mapView.overlays.clear()
 
-        // ─── تحميل المسار المحلي أولاً ────────────────────────────
         val goingPoints     = loadRouteLocally(context, routeName, "going")
         val returningPoints = loadRouteLocally(context, routeName, "returning")
 
         if (goingPoints.isNotEmpty()) {
-            drawRouteOnMap(
-                mapView, goingPoints, goingPolyline,
-                startTitle = when(lang) { "tr" -> "Gidiş Başlangıç"; "en" -> "Going Start"; else -> "بداية الذهاب" },
-                endTitle   = when(lang) { "tr" -> "Gidiş Sonu"; "en" -> "Going End"; else -> "نهاية الذهاب" }
+            drawRouteOnMap(mapView, goingPoints, goingPolyline,
+                when(lang) { "tr" -> "Gidiş Başlangıç"; "en" -> "Going Start"; else -> "بداية الذهاب" },
+                when(lang) { "tr" -> "Gidiş Sonu"; "en" -> "Going End"; else -> "نهاية الذهاب" }
             )
         }
 
         if (returningPoints.isNotEmpty()) {
-            drawRouteOnMap(
-                mapView, returningPoints, returningPolyline,
-                startTitle = when(lang) { "tr" -> "Dönüş Başlangıç"; "en" -> "Return Start"; else -> "بداية العودة" },
-                endTitle   = when(lang) { "tr" -> "Dönüş Sonu"; "en" -> "Return End"; else -> "نهاية العودة" }
+            drawRouteOnMap(mapView, returningPoints, returningPolyline,
+                when(lang) { "tr" -> "Dönüş Başlangıç"; "en" -> "Return Start"; else -> "بداية العودة" },
+                when(lang) { "tr" -> "Dönüş Sonu"; "en" -> "Return End"; else -> "نهاية العودة" }
             )
         }
 
@@ -369,7 +411,7 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
         mapView.overlays.add(goingPolyline)
         mapView.overlays.add(returningPolyline)
 
-        driverMarker.icon = createBusIcon(context, myDriverName, routeName)
+        driverMarker.icon  = createBusIcon(context, myDriverName, routeName)
         driverMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         driverMarker.title = myDriverName.ifBlank {
             when(lang) { "tr" -> "Siz"; "en" -> "You"; else -> "أنت" }
@@ -442,10 +484,10 @@ fun LiveMapScreen(lang: String, routeName: String, onEndWork: (WorkReport) -> Un
                     Text("🔴 ${when(lang) { "tr" -> "Dönüş"; "en" -> "Return"; else -> "عودة" }}", fontSize = 10.sp, color = Color(0xFFEF9A9A))
                     Text("🚌 $myDriverName", fontSize = 10.sp, color = Color(0xFF69F0AE))
                     if (otherBusCount > 0) {
-                        Text(
-                            "🚌 $otherBusCount ${when(lang) { "tr" -> "diğer"; "en" -> "others"; else -> "أخرى" }}",
-                            fontSize = 10.sp, color = Color(0xFFEF9A9A)
-                        )
+                        Text("🚌 $otherBusCount ${when(lang) { "tr" -> "diğer"; "en" -> "others"; else -> "أخرى" }}", fontSize = 10.sp, color = Color(0xFFEF9A9A))
+                    }
+                    if (passengerCount > 0) {
+                        Text("🧍 $passengerCount", fontSize = 10.sp, color = Color(0xFFFFD54F))
                     }
                     if (routeLoadStatus.isNotEmpty()) {
                         Text("[$routeLoadStatus]", fontSize = 9.sp, color = Color(0xFFFFD54F))
