@@ -22,7 +22,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
 .bus-marker-icon{background:transparent!important;border:none!important;}
-.hdr{background:var(--blue);padding:8px 14px 14px;color:#fff;display:flex;align-items:center;gap:10px}
+.hdr{background:var(--blue);padding:8px 14px;color:#fff;display:flex;align-items:center;gap:10px}
 .hdr-logo{font-size:20px}
 .hdr-title{flex:1}
 .hdr-title h1{font-size:16px;font-weight:700}
@@ -34,7 +34,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 .hdr-cancel-btn.show{display:block}
 .lang-select{background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.4);border-radius:8px;padding:4px 6px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;outline:none}
 .lang-select option{color:#1A2332;background:#fff}
-.wrap{max-width:520px;margin:-6px auto 0;padding:0 10px 30px}
+.wrap{max-width:520px;margin:0 auto;padding:0 10px 30px}
 .card{background:var(--card);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow);border:1px solid var(--border)}
 .card-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
 #map{height:520px;border-radius:12px;border:1.5px solid var(--border);overflow:hidden;z-index:0}
@@ -71,34 +71,29 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 .dir-go{background:#E3F2FD;color:#1565C0}
 .dir-back{background:#F3E5F5;color:#6A1B9A}
 
-/* ══════════════════════════════════════════
-   بطاقة التطبيق – QR + زر التثبيت
-══════════════════════════════════════════ */
-.app-card{
+/* ══ بطاقة التثبيت المصغرة ══ */
+.app-bar{
   background:linear-gradient(135deg,#1565C0 0%,#1E88E5 100%);
-  border-radius:var(--r);
-  padding:14px 16px;
-  margin-bottom:8px;
-  box-shadow:0 4px 20px rgba(21,101,192,.3);
-  color:#fff;
+  padding:8px 14px;
   display:flex;
   align-items:center;
-  gap:14px;
+  gap:10px;
+  margin-bottom:8px;
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
 }
-.app-card-qr{
+.app-bar-qr{
   flex-shrink:0;
   background:#fff;
-  border-radius:10px;
-  padding:6px;
-  width:82px;height:82px;
+  border-radius:8px;
+  padding:4px;
+  width:56px;height:56px;
   display:flex;align-items:center;justify-content:center;
 }
-.app-card-qr img,.app-card-qr canvas{border-radius:6px;display:block}
-.app-card-body{flex:1;min-width:0}
-.app-card-title{font-size:14px;font-weight:700;margin-bottom:2px}
-.app-card-sub{font-size:11px;color:rgba(255,255,255,.82);margin-bottom:10px;line-height:1.55}
+.app-bar-qr canvas,.app-bar-qr img{border-radius:4px;display:block}
 .install-btn{
-  display:inline-flex;align-items:center;gap:7px;
+  display:none;
+  align-items:center;gap:7px;
   background:#fff;color:var(--blue);
   border:none;border-radius:10px;
   padding:8px 16px;
@@ -106,21 +101,20 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
   cursor:pointer;transition:all .2s;
   box-shadow:0 2px 8px rgba(0,0,0,.18);
   white-space:nowrap;
+  flex:1;justify-content:center;
 }
-.install-btn:hover{background:#E3F2FD;transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.22)}
-.install-btn:active{transform:translateY(0)}
+.install-btn:hover{background:#E3F2FD;}
 .install-btn.installed{background:var(--green-light);color:var(--green);cursor:default}
-/* تعليمات iOS */
 .ios-hint{
   display:none;
   background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.3);
   border-radius:10px;
-  padding:8px 12px;
+  padding:6px 10px;
   font-size:11px;
   color:#fff;
   line-height:1.75;
-  margin-top:8px;
+  flex:1;
 }
 .ios-hint.show{display:block}
 </style>
@@ -141,20 +135,15 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 
 <div class="wrap">
 
-  <!-- ══ بطاقة QR + التثبيت ══ -->
-  <div class="app-card" id="appCard">
-    <div class="app-card-qr" id="qrBox"></div>
-    <div class="app-card-body">
-      <div class="app-card-title" id="appCardTitle">📲 Dolmuş NET</div>
-      <div class="app-card-sub" id="appCardSub">Uygulamayı ana ekrana ekle veya QR kodu ile paylaş</div>
-      <button class="install-btn" id="installBtn" onclick="triggerInstall()">
-        <span id="installBtnIcon">➕</span>
-        <span id="installBtnTxt">Ana Ekrana Ekle</span>
-      </button>
-      <div class="ios-hint" id="iosHint"></div>
-    </div>
+  <!-- ══ شريط التثبيت المصغر ══ -->
+  <div class="app-bar" id="appBar">
+    <div class="app-bar-qr" id="qrBox"></div>
+    <button class="install-btn" id="installBtn" onclick="triggerInstall()">
+      <span id="installBtnIcon">➕</span>
+      <span id="installBtnTxt">Ana Ekrana Ekle</span>
+    </button>
+    <div class="ios-hint" id="iosHint"></div>
   </div>
-  <!-- ══════════════════════════ -->
 
   <div class="card" id="mapCard">
     <div class="card-title" id="mapTitle">🗺️ Hat Haritası</div>
@@ -180,7 +169,6 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- مكتبة QR خفيفة من CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
@@ -198,11 +186,8 @@ const T = {
     lineLabel:'Hat:',goStart:'Gidiş Başlangıç',goEnd:'Gidiş Sonu',
     retStart:'Dönüş Başlangıç',retEnd:'Dönüş Sonu',myLoc:'📍 Konumunuz',cancel:'✖ İptal',
     moving:'🟢 Aktif',connErr:'Bağlantı hatası',
-    appCardTitle:'📲 Dolmuş NET',
-    appCardSub:'Uygulamayı ana ekrana ekle veya QR kodu ile paylaş',
-    installBtn:'Ana Ekrana Ekle',
-    installedBtn:'✅ Eklendi!',
-    iosHint:'<b>iOS Safari:</b> Alt menüdeki <b>Paylaş</b> 🔗 butonuna dokun,<br>ardından <b>"Ana Ekrana Ekle"</b> seçeneğini seç.'
+    installBtn:'Ana Ekrana Ekle',installedBtn:'✅ Eklendi!',
+    iosHint:'<b>Safari:</b> Paylaş 🔗 → <b>Ana Ekrana Ekle</b>'
   },
   en:{
     locBtn:'Find My Location',locating:'⏳ Locating...',locOk:'✅ Location Found',locErr:'↩ Location Failed',locNo:'❌ GPS Not Supported',
@@ -213,11 +198,8 @@ const T = {
     lineLabel:'Route:',goStart:'Going Start',goEnd:'Going End',
     retStart:'Return Start',retEnd:'Return End',myLoc:'📍 Your Location',cancel:'✖ Cancel',
     moving:'🟢 Active',connErr:'Connection error',
-    appCardTitle:'📲 Dolmuş NET',
-    appCardSub:'Add app to home screen or share via QR code',
-    installBtn:'Add to Home Screen',
-    installedBtn:'✅ Added!',
-    iosHint:'<b>iOS Safari:</b> Tap the <b>Share</b> 🔗 button at the bottom,<br>then choose <b>"Add to Home Screen"</b>.'
+    installBtn:'Add to Home Screen',installedBtn:'✅ Added!',
+    iosHint:'<b>Safari:</b> Share 🔗 → <b>Add to Home Screen</b>'
   },
   ar:{
     locBtn:'تحديد موقعي',locating:'⏳ جاري التحديد...',locOk:'✅ تم تحديد موقعك',locErr:'↩ تعذّر التحديد',locNo:'❌ GPS غير مدعوم',
@@ -228,11 +210,8 @@ const T = {
     lineLabel:'الخط:',goStart:'بداية الذهاب',goEnd:'نهاية الذهاب',
     retStart:'بداية العودة',retEnd:'نهاية العودة',myLoc:'📍 موقعك الحالي',cancel:'✖ إلغاء',
     moving:'🟢 متحرك',connErr:'خطأ في الاتصال',
-    appCardTitle:'📲 دولموش نت',
-    appCardSub:'أضف التطبيق إلى شاشتك الرئيسية أو شاركه عبر رمز QR',
-    installBtn:'أضف إلى الشاشة الرئيسية',
-    installedBtn:'✅ تمت الإضافة!',
-    iosHint:'<b>iOS Safari:</b> اضغط زر <b>المشاركة</b> 🔗 في الأسفل،<br>ثم اختر <b>"إضافة إلى الشاشة الرئيسية"</b>.'
+    installBtn:'أضف إلى الشاشة الرئيسية',installedBtn:'✅ تمت الإضافة!',
+    iosHint:'<b>Safari:</b> زر المشاركة 🔗 ← <b>إضافة إلى الشاشة الرئيسية</b>'
   }
 };
 
@@ -246,6 +225,8 @@ const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  btn.style.display = 'inline-flex';
 });
 
 window.addEventListener('appinstalled', () => {
@@ -258,6 +239,7 @@ function markInstalled(){
   document.getElementById('installBtnIcon').textContent = '✅';
   document.getElementById('installBtnTxt').textContent = T[lang].installedBtn;
   btn.classList.add('installed');
+  btn.style.display = 'inline-flex';
   btn.disabled = true;
   document.getElementById('iosHint').classList.remove('show');
 }
@@ -266,36 +248,32 @@ async function triggerInstall(){
   if(isStandalone){ markInstalled(); return; }
   if(deferredPrompt){
     deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+    const choice = await deferredPrompt.userChoice;
     deferredPrompt = null;
-  } else {
-    // iOS أو متصفح لا يدعم beforeinstallprompt → أظهر التعليمات
+    if(choice.outcome === 'accepted') markInstalled();
+  } else if(isIOS){
     document.getElementById('iosHint').classList.toggle('show');
   }
 }
 
-/* ══ QR Code ══ */
 function generateQR(){
   const box = document.getElementById('qrBox');
   box.innerHTML = '';
   const url = window.location.href.split('?')[0];
   try{
-    new QRCode(box, {
-      text: url,
-      width: 70, height: 70,
-      colorDark: '#1565C0',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-  } catch(e){
-    box.innerHTML = '<div style="font-size:38px;line-height:70px;text-align:center">📱</div>';
+    new QRCode(box,{text:url,width:48,height:48,colorDark:'#1565C0',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){
+    box.innerHTML='<div style="font-size:30px;line-height:48px;text-align:center">📱</div>';
   }
 }
 
 function initAppCard(){
   generateQR();
   document.getElementById('iosHint').innerHTML = T[lang].iosHint;
-  if(isStandalone) markInstalled();
+  if(isStandalone){ markInstalled(); return; }
+  if(isIOS){
+    document.getElementById('installBtn').style.display = 'inline-flex';
+  }
 }
 
 /* ══ اللغة ══ */
@@ -304,35 +282,29 @@ function setLang(l){
   const root = document.getElementById('htmlRoot');
   if(l==='ar'){ root.setAttribute('dir','rtl'); root.setAttribute('lang','ar'); }
   else { root.setAttribute('dir','ltr'); root.setAttribute('lang',l); }
-
   document.getElementById('locBtnTxt').textContent = T[l].locBtn;
   document.getElementById('cancelBtn').textContent = T[l].cancel;
   document.getElementById('mapTitle').textContent = T[l].mapTitle;
   document.getElementById('routeTitle').textContent = T[l].routeTitle;
   document.getElementById('refreshBtn').textContent = T[l].refresh;
   document.getElementById('updateTime').textContent = T[l].autoRefresh;
-  document.getElementById('appCardTitle').textContent = T[l].appCardTitle;
-  document.getElementById('appCardSub').textContent = T[l].appCardSub;
   document.getElementById('iosHint').innerHTML = T[l].iosHint;
   const ibt = document.getElementById('installBtnTxt');
   if(ibt && !document.getElementById('installBtn').disabled)
     ibt.textContent = T[l].installBtn;
-
   const hdrBtn = document.getElementById('hdrLocBtn');
   if(hdrBtn.classList.contains('ok')) document.getElementById('locBtnTxt').textContent = T[l].locOk;
   else if(hdrBtn.classList.contains('err')) document.getElementById('locBtnTxt').textContent = T[l].locErr;
   else if(hdrBtn.classList.contains('loading')) document.getElementById('locBtnTxt').textContent = T[l].locating;
-
   if(selectedRouteName){
-    document.getElementById('busesTitle').innerHTML =
-      T[l].busTitle+' &mdash; <span style="color:'+selectedColor+';font-weight:700">'+escH(selectedRouteName)+'</span>';
+    document.getElementById('busesTitle').innerHTML = T[l].busTitle+' &mdash; <span style="color:'+selectedColor+';font-weight:700">'+escH(selectedRouteName)+'</span>';
   } else {
     document.getElementById('busesTitle').textContent = T[l].busTitle;
   }
   if(map) loadRoutes();
 }
 
-/* ══ باقي المنطق الأصلي (بدون تعديل) ══ */
+/* ══ المنطق الأصلي ══ */
 let userLat=null,userLng=null,map=null,userMarker=null;
 let busMarkers=[],routePolylines={},selectedRouteName=null,selectedColor='#1E88E5';
 let busInterval=null,routeColorMap={};
