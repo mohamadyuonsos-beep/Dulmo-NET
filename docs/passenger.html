@@ -71,13 +71,13 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 .dir-go{background:#E3F2FD;color:#1565C0}
 .dir-back{background:#F3E5F5;color:#6A1B9A}
 
-/* ══ بطاقة التثبيت المصغرة ══ */
+/* ══ app-bar ══ */
 .app-bar{
   background:linear-gradient(135deg,#1565C0 0%,#1E88E5 100%);
-  padding:8px 14px;
+  padding:10px 14px;
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   margin-bottom:8px;
   border-radius:var(--r);
   box-shadow:var(--shadow);
@@ -92,12 +92,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 }
 .app-bar-qr canvas,.app-bar-qr img{border-radius:4px;display:block}
 .install-btn{
-  display:none;
+  display:inline-flex;
   align-items:center;gap:7px;
   background:#fff;color:var(--blue);
   border:none;border-radius:10px;
-  padding:8px 16px;
-  font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;
+  padding:12px 16px;
+  font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;
   cursor:pointer;transition:all .2s;
   box-shadow:0 2px 8px rgba(0,0,0,.18);
   white-space:nowrap;
@@ -135,7 +135,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);min-height:100vh;color:
 
 <div class="wrap">
 
-  <!-- ══ شريط التثبيت المصغر ══ -->
+  <!-- ══ شريط التثبيت ══ -->
   <div class="app-bar" id="appBar">
     <div class="app-bar-qr" id="qrBox"></div>
     <button class="install-btn" id="installBtn" onclick="triggerInstall()">
@@ -225,8 +225,6 @@ const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
-  const btn = document.getElementById('installBtn');
-  btn.style.display = 'inline-flex';
 });
 
 window.addEventListener('appinstalled', () => {
@@ -239,7 +237,6 @@ function markInstalled(){
   document.getElementById('installBtnIcon').textContent = '✅';
   document.getElementById('installBtnTxt').textContent = T[lang].installedBtn;
   btn.classList.add('installed');
-  btn.style.display = 'inline-flex';
   btn.disabled = true;
   document.getElementById('iosHint').classList.remove('show');
 }
