@@ -287,14 +287,12 @@ function generateQR(){
   const url = window.location.href.split('?')[0];
   try{
     new QRCode(box,{text:url,width:48,height:48,colorDark:'#1565C0',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-    // QR كبير للـ overlay
     const big = document.getElementById('qrBig');
     big.innerHTML = '';
     new QRCode(big,{text:url,width:260,height:260,colorDark:'#1565C0',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
   }catch(e){
     box.innerHTML='<div style="font-size:30px;line-height:48px;text-align:center">📱</div>';
   }
-  // فتح الـ overlay عند الضغط على QR الصغير
   box.onclick = () => document.getElementById('qrOverlay').classList.add('show');
 }
 
@@ -338,8 +336,17 @@ function setLang(l){
 /* ══ المنطق الأصلي ══ */
 let userLat=null,userLng=null,map=null,userMarker=null;
 let busMarkers=[],routePolylines={},selectedRouteName=null,selectedColor='#1E88E5';
-let busInterval=null,routeColorMap={};
-let passengerId='p_'+Math.random().toString(36).substr(2,9);
+let busInterval=null,heartbeatInterval=null,routeColorMap={};
+
+/* ═══════════════════════════════════════════════════
+   تعديل ١: passengerId ثابت في localStorage
+   بدلاً من إنشاء ID جديد في كل مرة
+═══════════════════════════════════════════════════ */
+let passengerId = localStorage.getItem('dolmus_passenger_id');
+if(!passengerId){
+  passengerId = 'p_' + Math.random().toString(36).substr(2,9);
+  localStorage.setItem('dolmus_passenger_id', passengerId);
+}
 
 function sbGet(table,params=''){
   return fetch(`${SB_URL}/rest/v1/${table}${params}`,
@@ -354,15 +361,25 @@ function fmtDist(m){return m<1000?Math.round(m)+'م':(m/1000).toFixed(1)+'كم';
 function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function nowTime(){return new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});}
 
+/* ═══════════════════════════════════════════════════
+   تعديل ٢: savePassengerLocation يرسل updated_at
+   لتتبع آخر نشاط للراكب
+═══════════════════════════════════════════════════ */
 async function savePassengerLocation(lat,lng,routeName){
   try{
     await fetch(`${SB_URL}/rest/v1/passenger_locations`,{
       method:'POST',
       headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({id:passengerId,route_name:routeName||'',lat,lng})
+      body:JSON.stringify({
+        id:passengerId,
+        route_name:routeName||'',
+        lat,lng,
+        updated_at: new Date().toISOString()
+      })
     });
   }catch(e){console.error(e);}
 }
+
 async function deletePassengerLocation(){
   try{
     await fetch(`${SB_URL}/rest/v1/passenger_locations?id=eq.${passengerId}`,{
@@ -371,7 +388,41 @@ async function deletePassengerLocation(){
   }catch(e){console.error(e);}
 }
 
+/* ═══════════════════════════════════════════════════
+   تعديل ٣: إغلاق المتصفح — محاولة الحذف بكل الطرق
+   visibilitychange + pagehide + beforeunload
+═══════════════════════════════════════════════════ */
+function tryDeleteOnExit(){
+  if(!selectedRouteName) return;
+  // الطريقة الأفضل على الموبايل: sendBeacon
+  const url = `${SB_URL}/rest/v1/passenger_locations?id=eq.${passengerId}`;
+  const sent = navigator.sendBeacon
+    ? navigator.sendBeacon(url + '&_method=DELETE', new Blob(
+        [JSON.stringify({})],
+        {type:'application/json'}
+      ))
+    : false;
+  // احتياطي: fetch مع keepalive
+  if(!sent){
+    fetch(url,{
+      method:'DELETE',
+      headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},
+      keepalive:true
+    }).catch(()=>{});
+  }
+}
+
+// عند إخفاء الصفحة (الموبايل يضغط الزر الرئيسي أو يغلق)
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState === 'hidden') tryDeleteOnExit();
+});
+
+// عند إغلاق أو تحديث المتصفح
+window.addEventListener('pagehide', tryDeleteOnExit);
+window.addEventListener('beforeunload', tryDeleteOnExit);
+
 async function cancelSelection(){
+  clearInterval(heartbeatInterval);
   await deletePassengerLocation();
   selectedRouteName=null;clearInterval(busInterval);
   document.getElementById('busesCard').classList.add('hidden');
@@ -484,6 +535,18 @@ function selectRoute(rName,color){
   document.getElementById('busesCard').classList.remove('hidden');
   document.getElementById('cancelBtn').classList.add('show');
   if(userLat&&userLng) savePassengerLocation(userLat,userLng,rName);
+
+  /* ═══════════════════════════════════════════════════
+     تعديل ٤: heartbeat كل 5 دقائق لتحديث updated_at
+     يضمن أن الراكب النشط لا يُحذف تلقائياً
+  ═══════════════════════════════════════════════════ */
+  clearInterval(heartbeatInterval);
+  heartbeatInterval = setInterval(()=>{
+    if(userLat && userLng && selectedRouteName){
+      savePassengerLocation(userLat, userLng, selectedRouteName);
+    }
+  }, 5 * 60 * 1000); // كل 5 دقائق
+
   clearInterval(busInterval);loadBuses();busInterval=setInterval(loadBuses,10000);
   setTimeout(()=>document.getElementById('busesCard').scrollIntoView({behavior:'smooth'}),300);
 }
@@ -516,7 +579,6 @@ async function loadBuses(){
   }
 }
 
-window.addEventListener('beforeunload',()=>{deletePassengerLocation();});
 window.addEventListener('load', initAppCard);
 </script>
 </body>
